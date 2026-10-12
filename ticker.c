@@ -8,7 +8,7 @@
 #include <time.h>
 
 #define MAX_FEEDS 10
-#define MAX_ITEMS_PER_FEED 10
+#define MAX_ITEMS_PER_FEED 15   // Updated to 15 items max per feed
 #define MAX_TOTAL_ITEMS (MAX_FEEDS * MAX_ITEMS_PER_FEED)
 #define TITLE_LEN 256
 #define DESC_LEN 1024
@@ -175,6 +175,7 @@ int fetch_rss_feed(const char *url, FeedItem *feed_items, int *count) {
         ptr += 6;
     }
 
+    // Always keep the last 15 items from the feed
     int start_idx = 0;
     if (temp_count > MAX_ITEMS_PER_FEED) {
         start_idx = temp_count - MAX_ITEMS_PER_FEED;
@@ -326,7 +327,6 @@ int main(void) {
         if (items_per_page < 1) items_per_page = 1;
         if (items_per_page > total_items) items_per_page = total_items;
 
-        // Keep scroll offset within valid bounds
         if (scroll_offset > total_items - items_per_page) {
             scroll_offset = total_items - items_per_page;
         }
@@ -340,7 +340,6 @@ int main(void) {
         for (int i = scroll_offset; i < total_items && current_row < usable_height; i++) {
             FeedItem *item = &all_items[i];
 
-            // Ensure adjacent lines never share the same speed interval
             if (item->speed_interval == 0 || item->speed_interval == last_speed) {
                 int new_speed;
                 do {
@@ -388,14 +387,12 @@ int main(void) {
             current_row += 2;
         }
 
-        // Footer instructions with vertical scrolling status
         move(max_y - 1, 0);
         clrtoeol();
         mvprintw(max_y - 1, 0, " [q] Quit | [Up/Down or k/j] Scroll (%d/%d) ", scroll_offset + 1, total_items - items_per_page + 1);
         
         refresh();
 
-        // Check user input and resize events
         int ch = getch();
         if (ch == KEY_RESIZE) {
             clear();
