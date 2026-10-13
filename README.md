@@ -4,7 +4,7 @@ A news ticker for the terminal
 <br><br>
 Compile with:
 <br><br>
-gcc -o ticker ticker.c -lncurses -lcurl
+gcc -o ticker ticker.c -lncurses -lcurl -lm
 <br><br>
 Preview:
 <br><br>
