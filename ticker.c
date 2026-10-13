@@ -8,7 +8,7 @@
 #include <time.h>
 
 #define MAX_FEEDS 10
-#define MAX_ITEMS_PER_FEED 15   // Updated to 15 items max per feed
+#define MAX_ITEMS_PER_FEED 15
 #define MAX_TOTAL_ITEMS (MAX_FEEDS * MAX_ITEMS_PER_FEED)
 #define TITLE_LEN 256
 #define DESC_LEN 1024
@@ -175,7 +175,6 @@ int fetch_rss_feed(const char *url, FeedItem *feed_items, int *count) {
         ptr += 6;
     }
 
-    // Always keep the last 15 items from the feed
     int start_idx = 0;
     if (temp_count > MAX_ITEMS_PER_FEED) {
         start_idx = temp_count - MAX_ITEMS_PER_FEED;
@@ -251,20 +250,20 @@ void refresh_all_feeds(const char **urls, int num_feeds, FeedItem *all_items, in
 int main(void) {
     srand(time(NULL));
 
-    const useconds_t TICKER_DELAY_US = 150000; // 50ms
+    const useconds_t TICKER_DELAY_US = 150000; // 150ms
 
     const char *urls[MAX_FEEDS] = {
         "https://www.alexjoneslive.com/feed/",
-"https://yts.ag/rss",
-"https://getcomics.org/feed",
-"https://theawesomer.com/tag/gadgets/feed/",
-"https://techcrunch.com/feed/",
-"https://gizmodo.com/rss",
-"https://www.tecmint.com/feed/",
-"https://vpuniverse.com/discover/1.xml/?member=1774&amp;key=2fa5a8557ebc017399704eb6de4d35ae",
-"https://www.wired.com/feed/rss"
+        "https://yts.ag/rss",
+        "https://getcomics.org/feed",
+        "https://theawesomer.com/tag/gadgets/feed/",
+        "https://techcrunch.com/feed/",
+        "https://gizmodo.com/rss",
+        "https://www.tecmint.com/feed/",
+        "https://vpuniverse.com/discover/1.xml/?member=1774&amp;key=2fa5a8557ebc017399704eb6de4d35ae",
+        "https://www.wired.com/feed/rss"
     };
-    int num_feeds = 3;
+    int num_feeds = 9;
 
     curl_global_init(CURL_GLOBAL_ALL);
 
@@ -276,15 +275,21 @@ int main(void) {
     nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
 
-    // Initialize Colors
+    // Initialize 24-bit TrueColor for even (#eeeeee) and odd (#cccccc) lines
     if (has_colors()) {
         start_color();
         use_default_colors();
         if (can_change_color()) {
-            init_color(8, 603, 804, 196); // Yellow-green #9ACD32
+            // Even lines: #eeeeee (R:238, G:238, B:238 -> ~933 on 0-1000 scale)
+            init_color(8, 933, 933, 933);
             init_pair(1, 8, -1);
+
+            // Odd lines: #cccccc (R:204, G:204, B:204 -> ~800 on 0-1000 scale)
+            init_color(9, 800, 800, 800);
+            init_pair(2, 9, -1);
         } else {
-            init_pair(1, COLOR_GREEN, -1);
+            init_pair(1, COLOR_WHITE, -1);
+            init_pair(2, COLOR_CYAN, -1);
         }
     }
 
@@ -340,6 +345,9 @@ int main(void) {
         for (int i = scroll_offset; i < total_items && current_row < usable_height; i++) {
             FeedItem *item = &all_items[i];
 
+            // Alternate colors per line/item index (Even = #eeeeee, Odd = #cccccc)
+            int color_pair = (i % 2 == 0) ? 1 : 2;
+
             if (item->speed_interval == 0 || item->speed_interval == last_speed) {
                 int new_speed;
                 do {
@@ -368,9 +376,9 @@ int main(void) {
                 move(current_row, 0);
                 clrtoeol();
 
-                attron(COLOR_PAIR(1));
+                attron(COLOR_PAIR(color_pair));
                 mvprintw(current_row, 0, "%s", ticker_buf);
-                attroff(COLOR_PAIR(1));
+                attroff(COLOR_PAIR(color_pair));
 
                 if (current_row + 1 < usable_height) {
                     move(current_row + 1, 0);
