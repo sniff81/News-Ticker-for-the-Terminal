@@ -8,7 +8,9 @@ gcc -o ticker ticker.c -lncurses -lcurl
 <br><br>
 Preview:
 <br><br>
-https://github.com/user-attachments/assets/a2220913-90ee-4499-adbd-c630bf74c27b
+https://github.com/user-attachments/assets/da62559b-295b-473a-8bdb-0fd771c5dd7a
+
+
 
 
 
