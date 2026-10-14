@@ -1,6 +1,7 @@
 # News-Ticker-for-the-Terminal
 A news ticker for the terminal
-
+<br><br>
+Updates every 5 minutes, allows vertical scrolling, color coded titles, sorted chronologically with latest items at the top
 <br><br>
 Compile with:
 <br><br>
